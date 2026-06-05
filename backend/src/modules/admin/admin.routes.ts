@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { adminController } from './admin.controller';
 import { validate } from '../../middleware/validate';
 import { authenticate, authorize } from '../../middleware/auth';
-import { createSessionSchema, updateSessionSchema, updateSessionStatusSchema, createUserSchema, createTribeSchema, updateTribeSchema, assignTribeSchema, adjustXpSchema, resetPasswordSchema } from './admin.schema';
+import { createSessionSchema, updateSessionSchema, updateSessionStatusSchema, createUserSchema, createTribeSchema, updateTribeSchema, assignTribeSchema, adjustXpSchema, resetPasswordSchema, changeUserRoleSchema } from './admin.schema';
 import { asyncHandler } from '../../utils/asyncHandler';
 
 const router = Router();
@@ -24,6 +24,7 @@ router.post('/sessions/:sessionId/regenerate-qr', asyncHandler(adminController.r
 router.post('/users', validate(createUserSchema), asyncHandler(adminController.createUser));
 router.get('/users', asyncHandler(adminController.getUsers));
 router.patch('/users/:userId/tribe', validate(assignTribeSchema), asyncHandler(adminController.assignTribe));
+router.patch('/users/:userId/role', validate(changeUserRoleSchema), asyncHandler(adminController.changeUserRole));
 router.patch('/users/:userId/xp', validate(adjustXpSchema), asyncHandler(adminController.adjustXp));
 router.post('/users/:userId/reset-password', validate(resetPasswordSchema), asyncHandler(adminController.resetUserPassword));
 router.delete('/users/:userId', asyncHandler(adminController.deleteUser));

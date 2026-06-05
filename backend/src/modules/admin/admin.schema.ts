@@ -66,6 +66,11 @@ export const resetPasswordSchema = z.object({
   defaultPassword: z.string().min(8).max(100).optional(),
 });
 
+export const changeUserRoleSchema = z.object({
+  role: z.enum(['ATTENDEE', 'STAFF', 'ADMIN', 'SUPER_ADMIN']),
+});
+
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type CreateTribeInput = z.infer<typeof createTribeSchema>;
+export type ChangeUserRoleInput = z.infer<typeof changeUserRoleSchema>;

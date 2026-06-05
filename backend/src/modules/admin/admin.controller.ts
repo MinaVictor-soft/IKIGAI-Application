@@ -48,6 +48,11 @@ export class AdminController {
     sendSuccess(res, result);
   }
 
+  async changeUserRole(req: Request, res: Response) {
+    const result = await adminService.changeUserRole(getParam(req, 'userId'), req.body.role);
+    sendSuccess(res, result);
+  }
+
   async resetUserPassword(req: Request, res: Response) {
     const result = await adminService.resetUserPassword(getParam(req, 'userId'), req.body?.defaultPassword);
     sendSuccess(res, result);

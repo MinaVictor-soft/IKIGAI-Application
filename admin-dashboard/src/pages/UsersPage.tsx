@@ -44,6 +44,16 @@ export default function UsersPage() {
     onError: (err: any) => toast.error(err.response?.data?.error?.message || 'Failed'),
   });
 
+  const changeRole = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      api.patch(`/admin/users/${userId}/role`, { role }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Role updated');
+    },
+    onError: (err: any) => toast.error(err.response?.data?.error?.message || 'Failed'),
+  });
+
   const { data: userDetail } = useQuery({
     queryKey: ['user-detail', detailUserId],
     queryFn: () => api.get(`/admin/users/${detailUserId}`).then((r) => r.data),
@@ -135,12 +145,20 @@ export default function UsersPage() {
                     <td className="px-4 py-3 text-sm text-gray-600">{u.church || '—'}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{u.diocese || '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        u.role === 'SUPER_ADMIN' ? 'bg-red-100 text-red-700' :
-                        u.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' :
-                        u.role === 'STAFF' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>{u.role}</span>
+                      {u.role === 'SUPER_ADMIN' ? (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">{u.role}</span>
+                      ) : (
+                        <select
+                          value={u.role}
+                          onChange={(e) => changeRole.mutate({ userId: u.id, role: e.target.value })}
+                          disabled={changeRole.isPending}
+                          className="px-2 py-0.5 rounded-full text-xs font-medium border border-gray-200 cursor-pointer"
+                        >
+                          <option value="ATTENDEE">ATTENDEE</option>
+                          <option value="STAFF">STAFF</option>
+                          <option value="ADMIN">ADMIN</option>
+                        </select>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -192,6 +210,8 @@ export default function UsersPage() {
           onClose={() => setDetailUserId(null)}
           onAdjustXp={(amount: number, reason: string) => adjustXp.mutate({ userId: detailUserId, amount, reason })}
           adjustLoading={adjustXp.isPending}
+          onChangeRole={(role: string) => changeRole.mutate({ userId: detailUserId, role })}
+          changeRoleLoading={changeRole.isPending}
         />
       )}
 
@@ -243,7 +263,7 @@ function CreateUserModal({ tribes, onClose, onSubmit, loading }: any) {
   );
 }
 
-function UserDetailModal({ user, onClose, onAdjustXp, adjustLoading }: any) {
+function UserDetailModal({ user, onClose, onAdjustXp, adjustLoading, onChangeRole, changeRoleLoading }: any) {
   const { t } = useLang();
   const [showAdjust, setShowAdjust] = useState(false);
   const [adjustAmount, setAdjustAmount] = useState('');
@@ -297,7 +317,20 @@ function UserDetailModal({ user, onClose, onAdjustXp, adjustLoading }: any) {
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500">{t('role')}</p>
-                <p className="font-semibold text-sm">{user.role}</p>
+                {user.role === 'SUPER_ADMIN' ? (
+                  <p className="font-semibold text-sm text-red-600">{user.role}</p>
+                ) : (
+                  <select
+                    value={user.role}
+                    onChange={(e) => onChangeRole(e.target.value)}
+                    disabled={changeRoleLoading}
+                    className="px-2 py-1 border border-gray-300 rounded text-sm cursor-pointer w-full"
+                  >
+                    <option value="ATTENDEE">ATTENDEE</option>
+                    <option value="STAFF">STAFF</option>
+                    <option value="ADMIN">ADMIN</option>
+                  </select>
+                )}
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500">{t('totalXp')}</p>

@@ -215,6 +215,36 @@ export class AdminService {
     return { userId, tribeId };
   }
 
+  async changeUserRole(userId: string, newRole: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'User not found');
+
+    // Prevent changing SUPER_ADMIN roles
+    if (user.role === 'SUPER_ADMIN') {
+      throw new AppError(403, 'CANNOT_MODIFY_SUPER_ADMIN', 'Cannot change super admin role');
+    }
+
+    // Validate new role
+    const validRoles = ['ATTENDEE', 'STAFF', 'ADMIN', 'SUPER_ADMIN'];
+    if (!validRoles.includes(newRole)) {
+      throw new AppError(400, 'INVALID_ROLE', 'Invalid role provided');
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole as any },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        updatedAt: true,
+      },
+    });
+
+    return updated;
+  }
+
   // ============ TRIBES ============
 
   async createTribe(input: CreateTribeInput) {
