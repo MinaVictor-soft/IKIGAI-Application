@@ -1,0 +1,16 @@
+entrypoint = "src/main.tsx"
+run = "npm run dev"
+
+[nix]
+channel = "unstable"
+
+[env]
+NODE_ENV = "production"
+VITE_API_URL = "http://localhost:3000/api"
+
+[packager]
+language = "nodejs"
+
+[[ports]]
+localPort = 5173
+externalPort = 80
