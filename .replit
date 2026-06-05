@@ -1,16 +1,27 @@
-run = "cd backend && npm run start"
 entrypoint = "backend/src/app.ts"
+run = "bash setup.sh && npm run dev"
 
 [nix]
-channel = "stable-24_05"
+channel = "unstable"
 
 [env]
 NODE_ENV = "production"
+PORT = "3000"
+DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/ikigai_quest"
+JWT_SECRET = "ikigai-quest-super-secret-key-change-in-production-12345"
+VITE_API_URL = "https://$REPLIT_SLUG.$REPLIT_USER.repl.co/api"
 
-[deployment]
-run = ["sh", "-c", "cd backend && npm run start"]
-build = ["sh", "-c", "cd admin-dashboard && npm install && npm run build && cd ../backend && npm install && npx prisma generate && npm run build"]
+[packager]
+language = "nodejs"
 
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[[ports]]
+localPort = 5174
+externalPort = 5174
+
+[[ports]]
+localPort = 5173
+externalPort = 5173
