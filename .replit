@@ -1,0 +1,16 @@
+run = "cd backend && npm run start"
+entrypoint = "backend/src/app.ts"
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+NODE_ENV = "production"
+
+[deployment]
+run = ["sh", "-c", "cd backend && npm run start"]
+build = ["sh", "-c", "cd admin-dashboard && npm install && npm run build && cd ../backend && npm install && npx prisma generate && npm run build"]
+
+[[ports]]
+localPort = 3000
+externalPort = 80
