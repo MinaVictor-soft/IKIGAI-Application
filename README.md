@@ -542,7 +542,23 @@ IKIGAI-APP/
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### ⚡ Deploy to Replit (30 seconds, Zero Configuration)
+
+Want to get started immediately without installing anything locally?
+
+**[👉 See QUICK_START.md for One-Click Replit Deployment 👈](QUICK_START.md)**
+
+Just:
+1. Go to https://replit.com
+2. Import from GitHub: `https://github.com/MinaVictor-soft/IKIGAI-APP`
+3. Click **Run**
+4. Done! ✅ App runs automatically
+
+---
+
+### Local Development Setup
+
+#### Prerequisites
 ```
 Node.js 18+
 PostgreSQL 13+
