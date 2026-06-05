@@ -254,11 +254,11 @@ Consider upgrading to:
 ## 📚 Complete Documentation
 
 For more details:
-- API Reference: `docs/API_ENDPOINTS_REFERENCE.md`
-- Database Schema: `docs/DATABASE_SCHEMA_COMPLETE.md`
-- Deployment Guide: `docs/DEPLOYMENT_REPLIT.md`
-- Troubleshooting: `docs/FIX_DESIGN_AFTER_REPLIT_DEPLOYMENT.md`
-- Post-Deployment: `docs/POST_DEPLOYMENT_CHECKLIST.md`
+- API Reference: `API_ENDPOINTS_REFERENCE.md`
+- Database Schema: `DATABASE_SCHEMA_COMPLETE.md`
+- Deployment Guide: `DEPLOYMENT_REPLIT.md`
+- Troubleshooting: `FIX_DESIGN_AFTER_REPLIT_DEPLOYMENT.md`
+- Post-Deployment: `POST_DEPLOYMENT_CHECKLIST.md`
 
 ---
 
@@ -296,4 +296,3 @@ Questions? Check the docs folder or review:
 ---
 
 **Happy deploying! 🚀**
-
