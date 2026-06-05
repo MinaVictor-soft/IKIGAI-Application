@@ -21,6 +21,16 @@ export default function ProfilePage() {
             <p className="text-lg font-semibold">{user?.email}</p>
           </div>
 
+          <div>
+            <p className="text-text-muted text-sm mb-1">{t('church') || 'الكنيسة'}</p>
+            <p className="text-lg font-semibold">{user?.church || '—'}</p>
+          </div>
+
+          <div>
+            <p className="text-text-muted text-sm mb-1">{t('diocese') || 'الأبرشية'}</p>
+            <p className="text-lg font-semibold">{user?.diocese || '—'}</p>
+          </div>
+
           <div className="pt-4 border-t border-border">
             <button className="bg-primary hover:bg-secondary text-white font-bold py-2 px-6 rounded-lg transition">
               {t('updateProfile')}

@@ -104,6 +104,8 @@ export default function UsersPage() {
               <tr>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">{t('name')}</th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">{t('email')}</th>
+                <th className="text-start px-4 py-3 font-medium text-gray-600">{lang === 'ar' ? 'الكنيسة' : 'Church'}</th>
+                <th className="text-start px-4 py-3 font-medium text-gray-600">{lang === 'ar' ? 'الأبرشية' : 'Diocese'}</th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">{t('role')}</th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">{t('tribe')}</th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">{t('conferenceXp')}</th>
@@ -115,20 +117,23 @@ export default function UsersPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {isLoading ? (
-                <tr><td colSpan={9} className="text-center py-8 text-gray-400">{t('loading')}</td></tr>
+                <tr><td colSpan={11} className="text-center py-8 text-gray-400">{t('loading')}</td></tr>
               ) : users?.length === 0 ? (
-                <tr><td colSpan={9} className="text-center py-8 text-gray-400">{t('noUsersFound')}</td></tr>
+                <tr><td colSpan={11} className="text-center py-8 text-gray-400">{t('noUsersFound')}</td></tr>
               ) : (
                 users?.filter((u: any) => {
                   if (!searchQuery.trim()) return true;
                   const q = searchQuery.toLowerCase();
                   return (u.name || '').toLowerCase().includes(q) ||
                     (u.email || '').toLowerCase().includes(q) ||
-                    (u.church || '').toLowerCase().includes(q);
+                    (u.church || '').toLowerCase().includes(q) ||
+                    (u.diocese || '').toLowerCase().includes(q);
                 }).map((u: any) => (
                   <tr key={u.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-900 cursor-pointer hover:text-indigo-600" onClick={() => setDetailUserId(u.id)}>{u.name}</td>
-                    <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{u.email}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{u.church || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{u.diocese || '—'}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         u.role === 'SUPER_ADMIN' ? 'bg-red-100 text-red-700' :

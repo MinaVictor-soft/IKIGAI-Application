@@ -10,6 +10,8 @@ interface LeaderboardEntry {
   xp: number
   rank?: number
   avatar?: string
+  church?: string
+  diocese?: string
 }
 
 interface Tribe {
@@ -150,6 +152,13 @@ export default function LeaderboardPage() {
                       {isUser && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded">You</span>}
                     </h3>
                     <p className="text-text-muted text-sm">Rank #{index + 1}</p>
+                    {(entry.church || entry.diocese) && (
+                      <p className="text-text-muted text-xs mt-1">
+                        {entry.church && <span>{entry.church}</span>}
+                        {entry.church && entry.diocese && <span> • </span>}
+                        {entry.diocese && <span>{entry.diocese}</span>}
+                      </p>
+                    )}
                   </div>
 
                   {/* XP */}
