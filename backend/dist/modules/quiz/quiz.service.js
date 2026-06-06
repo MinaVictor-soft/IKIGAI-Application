@@ -7,9 +7,38 @@ exports.quizService = exports.QuizService = void 0;
 const database_1 = __importDefault(require("../../config/database"));
 const errorHandler_1 = require("../../middleware/errorHandler");
 const xp_service_1 = require("../xp/xp.service");
+const notifications_service_1 = require("../notifications/notifications.service");
+const push_notifications_service_1 = require("../push-notifications/push-notifications.service");
 class QuizService {
     async createQuiz(input) {
-        return database_1.default.quiz.create({ data: input });
+        const quiz = await database_1.default.quiz.create({ data: input });
+        // Create notifications for all active users
+        try {
+            const users = await database_1.default.user.findMany({
+                where: { status: 'ACTIVE' },
+                select: { id: true },
+            });
+            const userIds = users.map(u => u.id);
+            if (userIds.length > 0) {
+                await notifications_service_1.notificationsService.createBulkNotifications(userIds, 'QUIZ_CREATED', '🎯 مسابقة جديدة!', `${quiz.title} • ${quiz.xpReward} XP`, {
+                    quizId: quiz.id,
+                    title: quiz.title,
+                    xpReward: quiz.xpReward,
+                });
+                // Send push notifications
+                await push_notifications_service_1.pushNotificationsService.sendBroadcastNotification('🎯 مسابقة جديدة!', `${quiz.title} • ${quiz.xpReward} XP`, {
+                    quizId: quiz.id,
+                    title: quiz.title,
+                    xpReward: quiz.xpReward,
+                    type: 'QUIZ_CREATED',
+                });
+            }
+        }
+        catch (error) {
+            // Log error but don't fail quiz creation
+            console.error('Error creating notifications for quiz:', error);
+        }
+        return quiz;
     }
     async addQuestion(quizId, input) {
         const quiz = await database_1.default.quiz.findUnique({ where: { id: quizId } });
@@ -97,7 +126,8 @@ class QuizService {
             }
         }
         const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
-        const passed = quiz.passingScore ? percentage >= quiz.passingScore : true;
+        const passingScore = quiz.passingScore ?? 70; // Default to 70% if not specified
+        const passed = percentage >= passingScore;
         const xpAwarded = passed ? quiz.xpReward : 0;
         // Calculate time taken
         let timeTakenSeconds;
@@ -145,10 +175,39 @@ class QuizService {
         const quiz = await database_1.default.quiz.findUnique({ where: { id: quizId } });
         if (!quiz)
             throw new errorHandler_1.AppError(404, 'QUIZ_NOT_FOUND', 'Quiz not found');
-        return database_1.default.quiz.update({
+        const updatedQuiz = await database_1.default.quiz.update({
             where: { id: quizId },
             data: { status },
         });
+        // If publishing quiz from DRAFT to ACTIVE, notify all users
+        if (quiz.status === 'DRAFT' && status === 'ACTIVE') {
+            try {
+                const users = await database_1.default.user.findMany({
+                    where: { status: 'ACTIVE' },
+                    select: { id: true },
+                });
+                const userIds = users.map(u => u.id);
+                if (userIds.length > 0) {
+                    await notifications_service_1.notificationsService.createBulkNotifications(userIds, 'QUIZ_CREATED', '🎯 مسابقة جديدة!', `${updatedQuiz.title} • ${updatedQuiz.xpReward} XP`, {
+                        quizId: updatedQuiz.id,
+                        title: updatedQuiz.title,
+                        xpReward: updatedQuiz.xpReward,
+                    });
+                    // Send push notifications
+                    await push_notifications_service_1.pushNotificationsService.sendBroadcastNotification('🎯 مسابقة جديدة!', `${updatedQuiz.title} • ${updatedQuiz.xpReward} XP`, {
+                        quizId: updatedQuiz.id,
+                        title: updatedQuiz.title,
+                        xpReward: updatedQuiz.xpReward,
+                        type: 'QUIZ_CREATED',
+                    });
+                }
+            }
+            catch (error) {
+                // Log error but don't fail quiz status update
+                console.error('Error creating notifications when publishing quiz:', error);
+            }
+        }
+        return updatedQuiz;
     }
     async getMySubmissions(userId) {
         const submissions = await database_1.default.quizSubmission.findMany({
