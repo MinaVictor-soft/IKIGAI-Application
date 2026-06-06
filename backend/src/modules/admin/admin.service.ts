@@ -638,7 +638,18 @@ export class AdminService {
 
   // CMS Config - bulk update for app name and info page
   async getCmsConfig() {
-    const keys = ['appName', 'appNameAr', 'infoPageTitle', 'infoPageTitleAr', 'infoPageContent', 'infoPageContentAr'];
+    const keys = [
+      'appName', 'appNameAr', 
+      'conferenceName', 'conferenceNameAr', 
+      'conferenceSlogan', 'conferenceSloganAr',
+      'homeSlogan', 'homeSloganAr',
+      'infoPageTitle', 'infoPageTitleAr', 
+      'infoPageContent', 'infoPageContentAr',
+      // Info page links
+      'supportEmail', 'supportPhone', 'websiteUrl',
+      'facebookUrl', 'twitterUrl', 'instagramUrl', 'linkedinUrl', 'youtubeUrl',
+      'whatsappNumber', 'linkedsUrl'
+    ];
     const configs = await prisma.systemConfig.findMany({
       where: { key: { in: keys } },
     });
