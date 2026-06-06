@@ -72,29 +72,12 @@ export const changeUserRoleSchema = z.object({
 });
 
 export const updateCmsConfigSchema = z.object({
-  appName: z.string().max(200).optional().nullable(),
-  appNameAr: z.string().max(200).optional().nullable(),
-  conferenceName: z.string().max(200).optional().nullable(),
-  conferenceNameAr: z.string().max(200).optional().nullable(),
-  conferenceSlogan: z.string().max(500).optional().nullable(),
-  conferenceSloganAr: z.string().max(500).optional().nullable(),
-  infoPageTitle: z.string().max(200).optional().nullable(),
-  infoPageTitleAr: z.string().max(200).optional().nullable(),
-  infoPageContent: z.string().optional().nullable(),
-  infoPageContentAr: z.string().optional().nullable(),
-  homeSlogan: z.string().optional().nullable(),
-  homeSloganAr: z.string().optional().nullable(),
-  // Info page links (editable) - allow empty strings
-  supportEmail: z.string().email().optional().or(z.literal('')),
-  supportPhone: z.string().optional().or(z.literal('')),
-  websiteUrl: z.string().url().optional().or(z.literal('')),
-  facebookUrl: z.string().url().optional().or(z.literal('')),
-  twitterUrl: z.string().url().optional().or(z.literal('')),
-  instagramUrl: z.string().url().optional().or(z.literal('')),
-  linkedinUrl: z.string().url().optional().or(z.literal('')),
-  youtubeUrl: z.string().url().optional().or(z.literal('')),
-  whatsappNumber: z.string().optional().or(z.literal('')),
-  linkedsUrl: z.string().url().optional().or(z.literal('')),
+  appName: z.string().max(200).optional(),
+  appNameAr: z.string().max(200).optional(),
+  infoPageTitle: z.string().max(200).optional(),
+  infoPageTitleAr: z.string().max(200).optional(),
+  infoPageContent: z.string().optional(),
+  infoPageContentAr: z.string().optional(),
 });
 
 export const updateNavConfigSchema = z.object({
