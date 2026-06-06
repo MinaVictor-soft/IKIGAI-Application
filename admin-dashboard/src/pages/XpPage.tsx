@@ -65,16 +65,19 @@ export default function XpPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {lbLoading ? (
-                <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={8} className="text-center py-8 text-gray-400">Loading...</td></tr>
               ) : lbError ? (
-                <tr><td colSpan={7} className="text-center py-8 text-red-400">Failed to load leaderboard. Please check your connection and try again.</td></tr>
+                <tr><td colSpan={8} className="text-center py-8 text-red-400">Failed to load leaderboard. Please check your connection and try again.</td></tr>
               ) : leaderboard?.map((u: any, i: number) => (
                 <tr key={u.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => { setHistoryUserId(u.id); setHistoryUserName(u.name); }}>
                   <td className="px-4 py-3 font-bold text-gray-400">{i + 1}</td>
                   <td className="px-4 py-3 font-medium text-gray-900">{u.name}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">
                     {u.church || u.diocese ? (
-                      <span>{u.church}{u.diocese ? ` • ${u.diocese}` : ''}</span>
+                      <div className="space-y-0.5">
+                        {u.church && <div>🏛️ {u.church}</div>}
+                        {u.diocese && <div className="text-xs text-gray-500">📍 {u.diocese}</div>}
+                      </div>
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}
