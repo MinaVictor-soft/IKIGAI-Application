@@ -102,7 +102,8 @@ export class QuizService {
     }
 
     const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
-    const passed = quiz.passingScore ? percentage >= quiz.passingScore : true;
+    const passingScore = quiz.passingScore ?? 70; // Default to 70% if not specified
+    const passed = percentage >= passingScore;
     const xpAwarded = passed ? quiz.xpReward : 0;
 
     // Calculate time taken

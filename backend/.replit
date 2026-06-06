@@ -1,5 +1,6 @@
 entrypoint = "src/app.ts"
 run = "npm run dev"
+modules = ["nodejs-20", "postgresql-16"]
 
 [nix]
 channel = "unstable"
@@ -7,7 +8,7 @@ channel = "unstable"
 [env]
 NODE_ENV = "production"
 PORT = "3000"
-DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/ikigai_quest"
+DATABASE_URL = "postgresql://postgres:password@helium:5432/heliumdb"
 JWT_SECRET = "ikigai-quest-secret-key-change-this"
 
 [packager]
@@ -16,3 +17,42 @@ language = "nodejs"
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+NODE_ENV = "development"
+JWT_SECRET = "ikigai-quest-secret-key-change-in-production"
+JWT_REFRESH_SECRET = "ikigai-quest-refresh-secret-key-change-in-production"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "DATABASE_URL=postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE ./node_modules/.bin/tsx watch src/app.ts"
+waitForPort = 3000
+
+[agent]
+expertMode = true
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["node", "dist/app.js"]
+build = ["sh", "-c", "npm install --include=dev && npm run build"]

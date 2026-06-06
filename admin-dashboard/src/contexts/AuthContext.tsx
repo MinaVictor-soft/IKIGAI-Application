@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem('accessToken');
     if (token) {
       api.get('/auth/me')
-        .then((res) => setUser(res.data.data))
+        .then((res) => setUser(res.data))
         .catch(() => localStorage.clear())
         .finally(() => setIsLoading(false));
     } else {
@@ -35,9 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('accessToken', data.data.accessToken);
-    localStorage.setItem('refreshToken', data.data.refreshToken);
-    setUser(data.data.user);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    setUser(data.user);
   };
 
   const logout = () => {
