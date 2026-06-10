@@ -294,6 +294,9 @@ model SportsTeam {
   awayMatches    Match[]  @relation("AwayTeam")
   matchEvents    MatchEvent[]
   playerStats    PlayerStats[]
+  tournamentGroupTeams TournamentGroupTeam[] @relation("TournamentGroupTeams")
+  tournamentHomeMatches TournamentMatch[] @relation("TournamentHomeTeam")
+  tournamentAwayMatches TournamentMatch[] @relation("TournamentAwayTeam")
 
   @@index([points(sort: Desc), goalDifference(sort: Desc), goalsFor(sort: Desc)], map: "idx_teams_points")
   @@index([captainId], map: "idx_teams_captain")
@@ -387,6 +390,138 @@ model PlayerStats {
   @@index([goals(sort: Desc)], map: "idx_stats_goals")
   @@index([teamId], map: "idx_stats_team")
   @@map("player_stats")
+}
+
+// ==================== TOURNAMENT DOMAIN ====================
+
+model Tournament {
+  id                      String    @id @default(uuid()) @db.Uuid
+  name                    String    @db.VarChar(200)
+  nameAr                  String?   @map("name_ar") @db.VarChar(200)
+  description             String?   @db.Text
+  descriptionAr           String?   @map("description_ar") @db.Text
+  status                  TournamentStatus @default(PLANNING)
+  startDate               DateTime? @map("start_date")
+  endDate                 DateTime? @map("end_date")
+  
+  // GROUP STAGE CONFIG
+  numberOfGroups          Int       @default(4) @map("number_of_groups")
+  teamsPerGroup           Int       @default(4) @map("teams_per_group")
+  teamsAdvancingPerGroup  Int       @default(2) @map("teams_advancing_per_group")
+  
+  // POINTS CONFIG
+  pointsForWin            Int       @default(3) @map("points_for_win")
+  pointsForDraw           Int       @default(1) @map("points_for_draw")
+  pointsForLoss           Int       @default(0) @map("points_for_loss")
+  
+  // XP CONFIG
+  groupStageWinXp         Int       @default(20) @map("group_stage_win_xp")
+  groupStageDrawXp        Int       @default(10) @map("group_stage_draw_xp")
+  groupStageLossXp        Int       @default(5) @map("group_stage_loss_xp")
+  quarterFinalWinXp       Int       @default(30) @map("quarter_final_win_xp")
+  quarterFinalLossXp      Int       @default(15) @map("quarter_final_loss_xp")
+  semiFinalWinXp          Int       @default(40) @map("semi_final_win_xp")
+  semiFinalLossXp         Int       @default(20) @map("semi_final_loss_xp")
+  finalWinnerXp           Int       @default(100) @map("final_winner_xp")
+  finalRunnerUpXp         Int       @default(50) @map("final_runner_up_xp")
+  
+  createdBy               String    @map("created_by") @db.Uuid
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+  
+  groups                  TournamentGroup[]
+  matches                 TournamentMatch[]
+  brackets                KnockoutBracket[]
+  
+  @@index([status], map: "idx_tournament_status")
+  @@index([startDate], map: "idx_tournament_start_date")
+  @@map("tournaments")
+}
+
+model TournamentGroup {
+  id                String    @id @default(uuid()) @db.Uuid
+  tournamentId      String    @map("tournament_id") @db.Uuid
+  groupName         String    @db.VarChar(10)
+  displayOrder      Int       @map("display_order")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  
+  tournament        Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teams             TournamentGroupTeam[]
+  matches           TournamentMatch[]
+  
+  @@unique([tournamentId, groupName], map: "uq_tournament_group")
+  @@index([tournamentId], map: "idx_group_tournament")
+  @@map("tournament_groups")
+}
+
+model TournamentGroupTeam {
+  id                String    @id @default(uuid()) @db.Uuid
+  groupId           String    @map("group_id") @db.Uuid
+  teamId            String    @map("team_id") @db.Uuid
+  matchesPlayed     Int       @default(0) @map("matches_played")
+  wins              Int       @default(0)
+  draws             Int       @default(0)
+  losses            Int       @default(0)
+  goalsFor          Int       @default(0) @map("goals_for")
+  goalsAgainst      Int       @default(0) @map("goals_against")
+  goalDifference    Int       @default(0) @map("goal_difference")
+  points            Int       @default(0)
+  qualified         Boolean   @default(false)
+  
+  group             TournamentGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  team              SportsTeam @relation("TournamentGroupTeams", fields: [teamId], references: [id], onDelete: Cascade)
+  
+  @@unique([groupId, teamId], map: "uq_group_team")
+  @@index([groupId], map: "idx_group_team_group")
+  @@index([teamId], map: "idx_group_team_team")
+  @@map("tournament_group_teams")
+}
+
+model TournamentMatch {
+  id                String    @id @default(uuid()) @db.Uuid
+  tournamentId      String    @map("tournament_id") @db.Uuid
+  groupId           String?   @map("group_id") @db.Uuid
+  stageType         MatchStageType @map("stage_type")
+  homeTeamId        String    @map("home_team_id") @db.Uuid
+  awayTeamId        String    @map("away_team_id") @db.Uuid
+  homeScore         Int?      @map("home_score")
+  awayScore         Int?      @map("away_score")
+  status            MatchStatus @default(SCHEDULED)
+  scheduledAt       DateTime? @map("scheduled_at")
+  completedAt       DateTime? @map("completed_at")
+  venue             String?   @db.VarChar(200)
+  notes             String?   @db.Text
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  
+  tournament        Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  group             TournamentGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  homeTeam          SportsTeam @relation("TournamentHomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeam          SportsTeam @relation("TournamentAwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  bracket           KnockoutBracket?
+  
+  @@index([tournamentId], map: "idx_tmatch_tournament")
+  @@index([groupId], map: "idx_tmatch_group")
+  @@index([status], map: "idx_tmatch_status")
+  @@index([stageType], map: "idx_tmatch_stage")
+  @@map("tournament_matches")
+}
+
+model KnockoutBracket {
+  id                String    @id @default(uuid()) @db.Uuid
+  tournamentId      String    @map("tournament_id") @db.Uuid
+  stageType         MatchStageType @map("stage_type")
+  matchId           String    @unique @map("match_id") @db.Uuid
+  winnerTeamId      String?   @map("winner_team_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  
+  tournament        Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  match             TournamentMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  
+  @@index([tournamentId], map: "idx_bracket_tournament")
+  @@index([stageType], map: "idx_bracket_stage")
+  @@map("knockout_brackets")
 }
 
 // ==================== PLATFORM DOMAIN ====================
@@ -606,5 +741,20 @@ enum EventType {
   YELLOW_CARD
   RED_CARD
   SUBSTITUTION
+}
+
+enum TournamentStatus {
+  PLANNING
+  GROUP_STAGE
+  KNOCKOUT
+  COMPLETED
+  CANCELLED
+}
+
+enum MatchStageType {
+  GROUP_STAGE
+  QUARTER_FINAL
+  SEMI_FINAL
+  FINAL
 }
 
